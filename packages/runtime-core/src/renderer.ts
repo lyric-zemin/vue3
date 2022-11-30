@@ -322,6 +322,7 @@ function baseCreateRenderer(
 ): HydrationRenderer
 
 // implementation
+// 闭包传入patch相关方法
 function baseCreateRenderer(
   options: RendererOptions,
   createHydrationFns?: typeof createHydrationFunctions
@@ -1166,6 +1167,7 @@ function baseCreateRenderer(
           optimized
         )
       } else {
+        // 挂载组件
         mountComponent(
           n2,
           container,
@@ -1197,6 +1199,7 @@ function baseCreateRenderer(
     const instance: ComponentInternalInstance =
       compatMountInstance ||
       (initialVNode.component = createComponentInstance(
+        // 创建组件实例
         initialVNode,
         parentComponent,
         parentSuspense
@@ -1221,6 +1224,7 @@ function baseCreateRenderer(
       if (__DEV__) {
         startMeasure(instance, `init`)
       }
+      // 初始化组件
       setupComponent(instance)
       if (__DEV__) {
         endMeasure(instance, `init`)
@@ -1240,7 +1244,7 @@ function baseCreateRenderer(
       }
       return
     }
-
+    // 创建挂载副作用
     setupRenderEffect(
       instance,
       initialVNode,
@@ -1367,6 +1371,7 @@ function baseCreateRenderer(
           if (__DEV__) {
             startMeasure(instance, `render`)
           }
+          // 生成真实vnode Tree
           const subTree = (instance.subTree = renderComponentRoot(instance))
           if (__DEV__) {
             endMeasure(instance, `render`)

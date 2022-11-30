@@ -37,7 +37,7 @@ const rendererOptions = /*#__PURE__*/ extend({ patchProp }, nodeOps)
 let renderer: Renderer<Element | ShadowRoot> | HydrationRenderer
 
 let enabledHydration = false
-
+// 根据平台生成渲染器
 function ensureRenderer() {
   return (
     renderer ||
@@ -62,7 +62,9 @@ export const hydrate = ((...args) => {
   ensureHydrationRenderer().hydrate(...args)
 }) as RootHydrateFunction
 
+// 入口方法
 export const createApp = ((...args) => {
+  // packages\runtime-core\src\apiCreateApp.ts
   const app = ensureRenderer().createApp(...args)
 
   if (__DEV__) {

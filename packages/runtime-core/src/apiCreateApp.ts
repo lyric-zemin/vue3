@@ -200,6 +200,7 @@ export function createAppAPI<HostElement>(
   render: RootRenderFunction<HostElement>,
   hydrate?: RootHydrateFunction
 ): CreateAppFunction<HostElement> {
+  // 真实createApp方法
   return function createApp(rootComponent, rootProps = null) {
     if (!isFunction(rootComponent)) {
       rootComponent = extend({}, rootComponent)
@@ -209,7 +210,7 @@ export function createAppAPI<HostElement>(
       __DEV__ && warn(`root props passed to app.mount() must be an object.`)
       rootProps = null
     }
-
+    // 创建app上下文对象
     const context = createAppContext()
 
     // TODO remove in 3.4
@@ -227,8 +228,9 @@ export function createAppAPI<HostElement>(
       })
     }
 
+    // 已安装插件记录Set
     const installedPlugins = new Set()
-
+    // 挂载标识
     let isMounted = false
 
     const app: App = (context.app = {
@@ -330,6 +332,7 @@ export function createAppAPI<HostElement>(
                 ` you need to unmount the previous app by calling \`app.unmount()\` first.`
             )
           }
+          // 构建占位符VNode
           const vnode = createVNode(
             rootComponent as ConcreteComponent,
             rootProps
@@ -348,6 +351,8 @@ export function createAppAPI<HostElement>(
           if (isHydrate && hydrate) {
             hydrate(vnode as VNode<Node, Element>, rootContainer as any)
           } else {
+            // 根组件渲染
+            // packages\runtime-core\src\renderer.ts
             render(vnode, rootContainer, isSVG)
           }
           isMounted = true

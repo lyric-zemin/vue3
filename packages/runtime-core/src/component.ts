@@ -490,7 +490,7 @@ export function createComponentInstance(
   // inherit parent app context - or - if root, adopt from root vnode
   const appContext =
     (parent ? parent.appContext : vnode.appContext) || emptyAppContext
-
+  // 组件实例对象
   const instance: ComponentInternalInstance = {
     uid: uid++,
     vnode,
@@ -830,6 +830,9 @@ export function registerRuntimeCompiler(_compile: any) {
 // dev only
 export const isRuntimeOnly = () => !compile
 
+/**
+ * 安装options
+ */
 export function finishComponentSetup(
   instance: ComponentInternalInstance,
   isSSR: boolean,
@@ -903,6 +906,7 @@ export function finishComponentSetup(
   if (__FEATURE_OPTIONS_API__ && !(__COMPAT__ && skipOptions)) {
     setCurrentInstance(instance)
     pauseTracking()
+    // options api 实现
     applyOptions(instance)
     resetTracking()
     unsetCurrentInstance()
