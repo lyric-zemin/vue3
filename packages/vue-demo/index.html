@@ -1,0 +1,21 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>Document</title>
+<script src="../vue/dist/vue.global.js"></script>
+
+<div id="app"></div>
+
+<script>
+  const { ref, createApp } = Vue
+
+  const App = {
+    template: ` <p>{{name}}</p> `,
+    setup() {
+      const name = ref("vue setup")
+      return { name }
+    }
+  }
+
+  const vm = createApp(App).mount("#app");
+</script>

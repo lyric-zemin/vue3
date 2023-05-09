@@ -398,6 +398,8 @@ importers:
         specifier: 3.3.0-beta.5
         version: link:../vue
 
+  packages/vue-demo: {}
+
 packages:
 
   /@ampproject/remapping@2.2.0:

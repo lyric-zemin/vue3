@@ -1244,7 +1244,7 @@ function baseCreateRenderer(
       }
       return
     }
-    // 创建挂载副作用
+    // 创建组件挂载副作用
     setupRenderEffect(
       instance,
       initialVNode,
