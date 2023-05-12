@@ -92,6 +92,11 @@ function hasOwnProperty(this: object, key: string) {
 }
 
 function createGetter(isReadonly = false, shallow = false) {
+  /**
+   * target 原始对象
+   * key 访问的key
+   * receiver 代理对象
+   */
   return function get(target: Target, key: string | symbol, receiver: object) {
     if (key === ReactiveFlags.IS_REACTIVE) {
       return !isReadonly
@@ -188,6 +193,7 @@ function createSetter(shallow = false) {
         : hasOwn(target, key)
     const result = Reflect.set(target, key, value, receiver)
     // don't trigger if target is something up in the prototype chain of original
+    // 触发副作用，根据操作不同，触发的副作用也不一样
     if (target === toRaw(receiver)) {
       if (!hadKey) {
         trigger(target, TriggerOpTypes.ADD, key, value)

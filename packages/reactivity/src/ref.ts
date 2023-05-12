@@ -39,6 +39,7 @@ type RefBase<T> = {
 
 export function trackRefValue(ref: RefBase<any>) {
   if (shouldTrack && activeEffect) {
+    // TODO: ? 这个猜测ref对象可能是Reactive，会造成不必要的响应触发问题
     ref = toRaw(ref)
     if (__DEV__) {
       trackEffects(ref.dep || (ref.dep = createDep()), {
@@ -47,12 +48,16 @@ export function trackRefValue(ref: RefBase<any>) {
         key: 'value'
       })
     } else {
+      // 副作用收集
+      // dep.add(activeEffect)
+      // activeEffect.deps.push(dep)
       trackEffects(ref.dep || (ref.dep = createDep()))
     }
   }
 }
 
 export function triggerRefValue(ref: RefBase<any>, newVal?: any) {
+  // TODO: ?
   ref = toRaw(ref)
   const dep = ref.dep
   if (dep) {
@@ -70,7 +75,7 @@ export function triggerRefValue(ref: RefBase<any>, newVal?: any) {
 }
 
 /**
- * Checks if a value is a ref object.
+ * 通过私有属性__v_isRef判断是否为Ref
  *
  * @param r - The value to inspect.
  * @see {@link https://vuejs.org/api/reactivity-utilities.html#isref}
@@ -132,10 +137,14 @@ function createRef(rawValue: unknown, shallow: boolean) {
 }
 
 class RefImpl<T> {
+  // value私有值，对象会转换为Reactive
   private _value: T
+  // 原始值，非响应
   private _rawValue: T
 
+  // 记录响应式副作用对象（ReactiveEffect）的一个Set集合
   public dep?: Dep = undefined
+  // 浅层响应标识
   public readonly __v_isRef = true
 
   constructor(value: T, public readonly __v_isShallow: boolean) {
@@ -144,17 +153,20 @@ class RefImpl<T> {
   }
 
   get value() {
+    // 收集副作用
     trackRefValue(this)
     return this._value
   }
 
   set value(newVal) {
+    // TODO: ? 指令使用的值 ？
     const useDirectValue =
       this.__v_isShallow || isShallow(newVal) || isReadonly(newVal)
     newVal = useDirectValue ? newVal : toRaw(newVal)
     if (hasChanged(newVal, this._rawValue)) {
       this._rawValue = newVal
       this._value = useDirectValue ? newVal : toReactive(newVal)
+      // 触发副作用
       triggerRefValue(this, newVal)
     }
   }
@@ -271,6 +283,7 @@ export type CustomRefFactory<T> = (
   set: (value: T) => void
 }
 
+// 自定义响应式数据
 class CustomRefImpl<T> {
   public dep?: Dep = undefined
 
@@ -280,6 +293,7 @@ class CustomRefImpl<T> {
   public readonly __v_isRef = true
 
   constructor(factory: CustomRefFactory<T>) {
+    // 参数为track ，trigger
     const { get, set } = factory(
       () => trackRefValue(this),
       () => triggerRefValue(this)
@@ -348,7 +362,8 @@ class ObjectRefImpl<T extends object, K extends keyof T> {
   set value(newVal) {
     this._object[this._key] = newVal
   }
-
+  // 副作用来自于_object(Reactive)对应_key的辅作用对象
+  // 所以如果_object为普通对象则无副作用
   get dep(): Dep | undefined {
     return getDepFromReactive(toRaw(this._object), this._key)
   }
@@ -440,6 +455,7 @@ export function toRef(
   }
 }
 
+// 对象属性值转ref
 function propertyToRef(source: object, key: string, defaultValue?: unknown) {
   const val = (source as any)[key]
   return isRef(val)

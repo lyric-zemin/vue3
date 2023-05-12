@@ -122,7 +122,7 @@ export function effectScope(detached?: boolean) {
 
 export function recordEffectScope(
   effect: ReactiveEffect,
-  scope: EffectScope | undefined = activeEffectScope
+  scope: EffectScope | undefined = activeEffectScope // 默认值为当前副作用域
 ) {
   if (scope && scope.active) {
     scope.effects.push(effect)

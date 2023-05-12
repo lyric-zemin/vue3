@@ -16,6 +16,7 @@ import { ComputedRefImpl } from './computed'
 // which maintains a Set of subscribers, but we simply store them as
 // raw Sets to reduce memory overhead.
 type KeyToDepMap = Map<any, Dep>
+// 响应式（reactive）对象对应的副作用map
 const targetMap = new WeakMap<any, KeyToDepMap>()
 
 // The number of effects currently being tracked recursively.
@@ -52,7 +53,10 @@ export const MAP_KEY_ITERATE_KEY = Symbol(__DEV__ ? 'Map key iterate' : '')
 
 export class ReactiveEffect<T = any> {
   active = true
+  // 依赖的响应式数据对应的dep集合
   deps: Dep[] = []
+  // 父副作用对象
+  // 副作用会存在嵌套
   parent: ReactiveEffect | undefined = undefined
 
   /**
@@ -78,6 +82,7 @@ export class ReactiveEffect<T = any> {
   constructor(
     public fn: () => T,
     public scheduler: EffectScheduler | null = null,
+    // 副作用作用域
     scope?: EffectScope
   ) {
     recordEffectScope(this, scope)
@@ -89,6 +94,7 @@ export class ReactiveEffect<T = any> {
     }
     let parent: ReactiveEffect | undefined = activeEffect
     let lastShouldTrack = shouldTrack
+    // TODO: 什么场景？
     while (parent) {
       if (parent === this) {
         return
@@ -397,6 +403,7 @@ export function triggerEffects(
   // spread into array for stabilization
   const effects = isArray(dep) ? dep : [...dep]
   for (const effect of effects) {
+    // 优先执行computed副作用
     if (effect.computed) {
       triggerEffect(effect, debuggerEventExtraInfo)
     }
@@ -416,6 +423,7 @@ function triggerEffect(
     if (__DEV__ && effect.onTrigger) {
       effect.onTrigger(extend({ effect }, debuggerEventExtraInfo))
     }
+    // 副作用存在调度执行，否则执行run
     if (effect.scheduler) {
       effect.scheduler()
     } else {

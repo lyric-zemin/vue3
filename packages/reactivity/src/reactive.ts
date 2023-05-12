@@ -28,9 +28,10 @@ export interface Target {
   [ReactiveFlags.IS_SHALLOW]?: boolean
   [ReactiveFlags.RAW]?: any
 }
-
+// 由reactive生成的代理(proxy对象)map
 export const reactiveMap = new WeakMap<Target, any>()
 export const shallowReactiveMap = new WeakMap<Target, any>()
+// 由readonly生成的代理(proxy对象)map
 export const readonlyMap = new WeakMap<Target, any>()
 export const shallowReadonlyMap = new WeakMap<Target, any>()
 
@@ -245,6 +246,7 @@ export function shallowReadonly<T extends object>(target: T): Readonly<T> {
   )
 }
 
+// 创建响应式对象
 function createReactiveObject(
   target: Target,
   isReadonly: boolean,
@@ -272,6 +274,7 @@ function createReactiveObject(
     return existingProxy
   }
   // only specific value types can be observed.
+  // 获取target对象的代理类型
   const targetType = getTargetType(target)
   if (targetType === TargetType.INVALID) {
     return target
