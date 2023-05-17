@@ -1,0 +1,35 @@
+<title>renderer</title>
+<script src="../vue/dist/vue.global.js"></script>
+
+<div id="app"></div>
+
+<script>
+  const { ref, createApp, h } = Vue
+
+  // render -> vnode -> 真实dom
+  const Child = {
+    name: 'Child',
+    setup(props, ctx) {
+      const msg = ref('Hello World!')
+
+      return () => {
+        const vnode = h('h1', [msg.value, ctx.slots.default()])
+        return vnode
+      }
+    }
+  }
+
+  // 生成Parent vnode, instance -> update -> subtree -> render
+  // -> 生成Child vnode, instance(这个存在children)  -> update -> subtree -> render
+  const Parent = {
+    name: 'Parent',
+    setup() {
+      return () => {
+        const vnode = h(Child, h('h2', 'h22'))
+        return vnode
+      }
+    }
+  }
+
+  const vm = createApp(Parent).mount("#app");
+</script>

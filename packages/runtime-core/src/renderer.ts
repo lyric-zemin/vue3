@@ -355,6 +355,8 @@ function baseCreateRenderer(
 
   // Note: functions inside this closure should use `const xxx = () => {}`
   // style in order to prevent being inlined by minifiers.
+  // n1 旧的vnode n2 新的vnode
+  // container 挂载容器 anchor 挂载参考节点
   const patch: PatchFn = (
     n1,
     n2,
@@ -1196,6 +1198,8 @@ function baseCreateRenderer(
     // mounting
     const compatMountInstance =
       __COMPAT__ && initialVNode.isCompatRoot && initialVNode.component
+    // 初始化组件实例，此时render函数还未执行
+    // initialVNode 为占位节点，包含的children会被代理为slots
     const instance: ComponentInternalInstance =
       compatMountInstance ||
       (initialVNode.component = createComponentInstance(
@@ -1244,7 +1248,9 @@ function baseCreateRenderer(
       }
       return
     }
+
     // 创建组件挂载副作用
+    // 并执行一次
     setupRenderEffect(
       instance,
       initialVNode,
@@ -1371,7 +1377,9 @@ function baseCreateRenderer(
           if (__DEV__) {
             startMeasure(instance, `render`)
           }
+
           // 生成真实vnode Tree
+          //
           const subTree = (instance.subTree = renderComponentRoot(instance))
           if (__DEV__) {
             endMeasure(instance, `render`)
@@ -1766,9 +1774,13 @@ function baseCreateRenderer(
     slotScopeIds: string[] | null,
     optimized: boolean
   ) => {
+    // 当前索引位置
     let i = 0
+    // 新child的长度
     const l2 = c2.length
+    // 旧child 最后一位的索引值
     let e1 = c1.length - 1 // prev ending index
+    // 新child 最后一位的索引值
     let e2 = l2 - 1 // next ending index
 
     // 1. sync from start
@@ -2322,12 +2334,15 @@ function baseCreateRenderer(
     return hostNextSibling((vnode.anchor || vnode.el)!)
   }
 
+  // 根组件渲染方法
   const render: RootRenderFunction = (vnode, container, isSVG) => {
+    // 卸载根组件
     if (vnode == null) {
       if (container._vnode) {
         unmount(container._vnode, null, null, true)
       }
     } else {
+      // 挂载根组件
       patch(container._vnode || null, vnode, container, null, null, null, isSVG)
     }
     flushPreFlushCbs()
