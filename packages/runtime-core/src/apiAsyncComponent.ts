@@ -23,15 +23,23 @@ export type AsyncComponentLoader<T = any> = () => Promise<
 >
 
 export interface AsyncComponentOptions<T = any> {
+  // 组件加载函数
   loader: AsyncComponentLoader<T>
+  // loading组件
   loadingComponent?: Component
+  // error组件
   errorComponent?: Component
+  // 延迟渲染时间
   delay?: number
+  // 超时时间
   timeout?: number
   suspensible?: boolean
+  // 组件加载错误处理函数
   onError?: (
     error: Error,
+    // 重载
     retry: () => void,
+    // 抛出错误
     fail: () => void,
     attempts: number
   ) => any
@@ -40,9 +48,16 @@ export interface AsyncComponentOptions<T = any> {
 export const isAsyncWrapper = (i: ComponentInternalInstance | VNode): boolean =>
   !!(i.type as ComponentOptions).__asyncLoader
 
+/**
+ * 定义异步组件
+ * 返回一个包裹组件
+ * @param source 一个返回promise对象的函数 | 一个配置对象
+ * @returns
+ */
 export function defineAsyncComponent<
   T extends Component = { new (): ComponentPublicInstance }
 >(source: AsyncComponentLoader<T> | AsyncComponentOptions<T>): T {
+  // 入参为函数时标准化
   if (isFunction(source)) {
     source = { loader: source }
   }
@@ -57,10 +72,13 @@ export function defineAsyncComponent<
     onError: userOnError
   } = source
 
+  // 请求函数
   let pendingRequest: Promise<ConcreteComponent> | null = null
+  // 加载完成的组件
   let resolvedComp: ConcreteComponent | undefined
 
   let retries = 0
+  // 组件加载重试
   const retry = () => {
     retries++
     pendingRequest = null
@@ -158,8 +176,10 @@ export function defineAsyncComponent<
           })
       }
 
+      // 加载完成标识
       const loaded = ref(false)
       const error = ref()
+      // 延迟渲染标识
       const delayed = ref(!!delay)
 
       if (delay) {
@@ -209,6 +229,7 @@ export function defineAsyncComponent<
   }) as T
 }
 
+// 合入外部传入的根属性
 function createInnerComp(
   comp: ConcreteComponent,
   parent: ComponentInternalInstance

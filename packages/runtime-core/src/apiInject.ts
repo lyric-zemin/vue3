@@ -15,6 +15,7 @@ export function provide<T, K = InjectionKey<T> | string | number>(
       warn(`provide() can only be used inside setup().`)
     }
   } else {
+    // 在createComponentInstance中非根组件provides会直接引用父组件的provides
     let provides = currentInstance.provides
     // by default an instance inherits its parent's provides object
     // but when it needs to provide values of its own, it creates its
@@ -24,6 +25,8 @@ export function provide<T, K = InjectionKey<T> | string | number>(
     const parentProvides =
       currentInstance.parent && currentInstance.parent.provides
     if (parentProvides === provides) {
+      // 用父组件provides为原型创建新provides对象
+      // 实现覆盖同key的值并继承父组件所有的provides
       provides = currentInstance.provides = Object.create(parentProvides)
     }
     // TS doesn't allow symbol as index type
@@ -49,6 +52,7 @@ export function inject(
 ) {
   // fallback to `currentRenderingInstance` so that this can be called in
   // a functional component
+  // 函数式组件为currentRenderingInstance
   const instance = currentInstance || currentRenderingInstance
 
   // also support looking up from app-level provides w/ `app.runWithContext()`
@@ -56,6 +60,8 @@ export function inject(
     // #2400
     // to support `app.use` plugins,
     // fallback to appContext's `provides` if the instance is at root
+    // 拿到父组件的provides对象
+    // 根组件回退到app上的provides
     const provides = instance
       ? instance.parent == null
         ? instance.vnode.appContext && instance.vnode.appContext.provides
