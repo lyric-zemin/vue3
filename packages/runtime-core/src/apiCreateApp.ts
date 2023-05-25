@@ -333,10 +333,7 @@ export function createAppAPI<HostElement>(
             )
           }
           // 构建占位符VNode
-          const vnode = createVNode(
-            rootComponent as ConcreteComponent,
-            rootProps
-          )
+          const vnode = createVNode(rootComponent, rootProps)
           // store app context on the root VNode.
           // this will be set on the root instance on initial mount.
           vnode.appContext = context

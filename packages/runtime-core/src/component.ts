@@ -161,7 +161,7 @@ export type ConcreteComponent<
   M extends MethodOptions = MethodOptions
 > =
   | ComponentOptions<Props, RawBindings, D, C, M>
-  | FunctionalComponent<Props, any, any>
+  | FunctionalComponent<Props, any>
 
 /**
  * A type used in public APIs where a component type is expected.
@@ -906,10 +906,13 @@ export function finishComponentSetup(
   if (__FEATURE_OPTIONS_API__ && !(__COMPAT__ && skipOptions)) {
     setCurrentInstance(instance)
     pauseTracking()
-    // options api 实现
-    applyOptions(instance)
-    resetTracking()
-    unsetCurrentInstance()
+    try {
+      // options api 实现
+      applyOptions(instance)
+    } finally {
+      resetTracking()
+      unsetCurrentInstance()
+    }
   }
 
   // warn missing template/render
